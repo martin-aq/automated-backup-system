@@ -53,7 +53,35 @@ This project automates directory backups using a Bash script. It compresses the 
    BACKUP_SRC="/path/to/your/directory"
    S3_BUCKET="s3://your-s3-bucket-name"
    BACKUP_DEST="/tmp"
+   TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+   BACKUP_FILE="${BACKUP_DEST}/backup_${TIMESTAMP}.tar.gz"
    LOG_FILE="/var/log/backup.log"
+
+   # Create log directory if it doesn't exist
+   mkdir -p $(dirname "$LOG_FILE")
+
+   # Start backup
+   echo "[$(date)] Starting backup of $BACKUP_SRC" | tee -a "$LOG_FILE"
+
+   # Create a compressed backup
+   tar -czf "$BACKUP_FILE" "$BACKUP_SRC" 2>>"$LOG_FILE"
+   if [ $? -ne 0 ]; then
+      echo "[$(date)] ❌ Backup creation failed!" | tee -a "$LOG_FILE"
+      exit 1
+   fi
+
+   # Upload backup to S3
+   aws s3 cp "$BACKUP_FILE" "$S3_BUCKET/" 2>>"$LOG_FILE"
+   if [ $? -ne 0 ]; then
+      echo "[$(date)] ❌ S3 upload failed!" | tee -a "$LOG_FILE"
+      exit 1
+   fi
+
+   # Cleanup local backup
+   rm -f "$BACKUP_FILE"
+
+   echo "[$(date)] ✅ Backup completed and uploaded to S3 successfully!" | tee -a "$LOG_FILE"
+   exit 0
    ```
 
 3. **Make Script Executable:**
