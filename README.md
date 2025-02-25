@@ -91,7 +91,7 @@ This project automates directory backups using a Bash script. It compresses the 
 
 ## 📝 Example Log Output
 
-Example entry in `/var/log/automated_backup.log`:
+Example entry in `/var/log/backup.log`:
 
 ```
 [2025-02-24 02:00:01] Starting backup of /path/to/your/directory
