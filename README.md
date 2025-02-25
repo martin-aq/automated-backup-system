@@ -60,6 +60,14 @@ This project automates directory backups using a Bash script. It compresses the 
    ```bash
    chmod +x automated_backup.sh
    ```
+   
+4. **Commit Initial Configuration:**
+   After editing the backup script, commit your changes:
+   ```bash
+   git add automated_backup.sh
+   git commit -m "Initial backup configuration"
+   git push origin main
+   ```
 
 ---
 
@@ -130,4 +138,3 @@ This project is licensed under the MIT License.
 ---
 
 💡 *Built with Bash and AWS S3 for simplified backup automation.*
-
