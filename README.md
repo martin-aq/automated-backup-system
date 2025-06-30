@@ -117,6 +117,7 @@ Each run of the script generates a log file:
 - 📅 Retention policies
 - 📂 Multi-directory backup
 - ⚙️ Improved error handling
+- 🔔 Enable AWS SNS notifications
 
 ---
 
