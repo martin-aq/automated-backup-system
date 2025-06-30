@@ -56,15 +56,16 @@ You want to back up your `/var/www` directory and store the compressed backup on
 
    - 📝 Side note: Running the script manually once is strongly recommended as we can verify whether it works as expected.
 
-5. **Automate with Cron Job**
-E.g., to run this script every Friday at 17:00:
-```bash
-crontab -e
-```
-Add this line:
-```bash
-0 17 * * 5 /path/to/automated_backup.sh >> /var/log/backup_cron_output.log 2>&1
-```
+5. **Automate with Cron Job**:
+
+   E.g., to run this script every Friday at 17:00:
+   ```bash
+   crontab -e
+   ```
+   Add this line:
+   ```bash
+   0 17 * * 5 /path/to/automated_backup.sh >> /var/log/backup_cron_output.log 2>&1
+   ```
  
 ---
 
@@ -104,7 +105,7 @@ Each run of the script generates a log file:
 
 ## 🛠️ Troubleshooting
 
-- **AWS CLI not installed?** The script will try to install it manually using `apt` or `yum` depending on your OS.
+- **AWS CLI not installed?** The script will try to install it automatically using `apt` or `yum` depending on your OS.
 - **Permission denied?** Run the script as root using `sudo`.
 - **Backup upload failed?** Check your AWS credentials (`~/.aws/credentials`) or IAM permissions.
 
