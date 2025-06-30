@@ -1,137 +1,96 @@
-# 🗄️ Automated Backup System with Bash and AWS S3
+# 📜 Automated Backup Script with AWS S3 Integration
 
-This project automates directory backups using a Bash script. It compresses the data and uploads it to an AWS S3 bucket. The system includes basic error handling and logging.
+This Bash script automates the process of creating compressed backups of a specified directory and uploads them to an AWS S3 bucket. It includes basic logging, error handling, and ensures that required tools are available before proceeding.
 
 ---
 
-## 🚀 Features
+## 📁 Features
 
-- 🕰️ Scheduled backups with Cron
-- 📦 Compressed archive (`.tar.gz`)
-- ☁️ Automatic upload to AWS S3
-- 📝 Backup logging
+- Smart AWS CLI installer based on OS type (Ubuntu/RHEL only)
+- Secure backup using `.tar.gz` compression
+- Automatic upload to AWS S3
+- Logging for backup events and errors
+- Cron job ready
+- Colored terminal output for better visibility
+
+---
+
+## 📂 Example Use Case
+
+You want to back up your `/var/www` directory and store the compressed backup on Amazon S3. This script makes it easy, even installing AWS CLI if it isn’t already installed.
 
 ---
 
 ## 🛠️ Prerequisites
 
-1. **Install AWS CLI**  
-   ```bash
-   sudo apt update
-   curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-   unzip awscliv2.zip
-   sudo ./aws/install
-   ```
-
-2. **Configure AWS CLI**  
-   ```bash
-   aws configure
-   ```
-   Enter:
-   - AWS Access Key ID  
-   - AWS Secret Access Key  
-   - Default region  
-   - Output format (`json`, `table`, or `text`)
-
-3. **Create an S3 Bucket**  
-   - Go to the AWS S3 console.  
-   - Create a private bucket (example: `my-backup-demo-bucket`).
+- Bash shell (`/bin/bash`)
+- Root/sudo privileges
+- AWS CLI installed (auto-installed by the script if not found)
+- AWS credentials configured (`~/.aws/credentials`) via:
+  ```bash
+  aws configure
+  ```
+- An S3 bucket
 
 ---
 
-## 📜 Setup
+## 📦 Usage
 
-1. **Clone the Repository:**
+1. **Clone this repository**
+
+2. **Update script variables**:
    ```bash
-   git clone https://github.com/yourusername/automated-backup-system.git
-   cd automated-backup-system
+   SOURCE_DIR="/var/www"              # Directory to back up.
+   S3_BUCKET="s3://demo-bucket-name"    # S3 bucket to upload to.
    ```
 
-2. **Edit Configuration in `automated_backup.sh`:**
-   ```bash
-   # Configuration
-   BACKUP_SRC="/path/to/your/directory"
-   S3_BUCKET="s3://your-s3-bucket-name"
-   BACKUP_DEST="/tmp"
-   TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-   BACKUP_FILE="${BACKUP_DEST}/backup_${TIMESTAMP}.tar.gz"
-   LOG_FILE="/var/log/backup.log"
-
-   # Create log directory if it doesn't exist
-   mkdir -p $(dirname "$LOG_FILE")
-
-   # Start backup
-   echo "[$(date)] Starting backup of $BACKUP_SRC" | tee -a "$LOG_FILE"
-
-   # Create a compressed backup
-   tar -czf "$BACKUP_FILE" "$BACKUP_SRC" 2>>"$LOG_FILE"
-   if [ $? -ne 0 ]; then
-      echo "[$(date)] ❌ Backup creation failed!" | tee -a "$LOG_FILE"
-      exit 1
-   fi
-
-   # Upload backup to S3
-   aws s3 cp "$BACKUP_FILE" "$S3_BUCKET/" 2>>"$LOG_FILE"
-   if [ $? -ne 0 ]; then
-      echo "[$(date)] ❌ S3 upload failed!" | tee -a "$LOG_FILE"
-      exit 1
-   fi
-
-   # Cleanup local backup
-   rm -f "$BACKUP_FILE"
-
-   echo "[$(date)] ✅ Backup completed and uploaded to S3 successfully!" | tee -a "$LOG_FILE"
-   exit 0
-   ```
-
-3. **Make Script Executable:**
+3. **Make the script executable**:
    ```bash
    chmod +x automated_backup.sh
    ```
-   
-4. **Commit Initial Configuration:**
-   After editing the backup script, commit your changes:
-   ```bash
-   git add automated_backup.sh
-   git commit -m "Initial backup configuration"
-   git push origin main
-   ```
 
----
-
-## 🚀 Usage
-
-1. **Run Manually:**
+4. **Run the script manually**:
    ```bash
    ./automated_backup.sh
    ```
 
-2. **Automate with Cron (every Friday at 5PM):**
-   ```bash
-   crontab -e
-   ```
-   Add this line:
-   ```
-   0 17 * * 5 /path/to/automated_backup.sh
-   ```
+   - 📝 Side note: Running the script manually once is strongly recommended as we can verify whether it works as expected.
+
+5. **Automate with Cron Job**
+E.g., to run this script every Friday at 17:00:
+```bash
+crontab -e
+```
+Add this line:
+```bash
+0 17 * * 5 /path/to/automated_backup.sh >> /var/log/backup_cron_output.log 2>&1
+```
+ 
+---
+
+## 🧪 What This Script Does
+
+1. Checks and install AWS CLI (Debian or RHEL based)
+2. Ensures the source directory exists
+3. Creates a `.tar.gz` backup with a timestamp
+4. Uploads it to a defined S3 bucket
+5. Logs each step and deletes the local backup after successful upload
 
 ---
 
-## 📝 Example Log Output
+## 📄 Log Files
 
-Example entry in `/var/log/backup.log`:
+Each run of the script generates a log file:
+```bash
+/var/log/backup_YYYY-MM-DD_HH:MM:SS.log
+```
 
-```
-[2025-02-24 02:00:01] Starting backup of /path/to/your/directory
-[2025-02-24 02:00:10] ✅ Backup completed and uploaded to S3 successfully!
-```
 ---
 
-## 💻 Monitoring and Logs
-
-- **Check logs for backup status:**
-```
-tail -f /var/log/backup.log
+## ✅ Sample Output
+```bash
+✅ Backup created: /tmp/www_backup_2025-06-29_00:00:00.tar.gz
+✅ Backup uploaded to S3 successfully.
 ```
 
 ---
@@ -140,13 +99,20 @@ tail -f /var/log/backup.log
 
 - 🔒 Ensure AWS credentials are stored securely in `~/.aws/credentials`.
 - 🚫 Set S3 bucket permissions to **private**.
-- 🕰️ Enable versioning or lifecycle policies for retention.
+
+---
+
+## 🛠️ Troubleshooting
+
+- **AWS CLI not installed?** The script will try to install it manually using `apt` or `yum` depending on your OS.
+- **Permission denied?** Run the script as root using `sudo`.
+- **Backup upload failed?** Check your AWS credentials (`~/.aws/credentials`) or IAM permissions.
 
 ---
 
 ## 🎨 Future Enhancements
 
-- 🔑 AWS KMS encryption
+- 🔐 AWS KMS encryption
 - 📅 Retention policies
 - 📂 Multi-directory backup
 - ⚙️ Improved error handling
@@ -162,7 +128,3 @@ Contributions are welcome! Feel free to fork the repo and submit pull requests. 
 ## 📄 License
 
 This project is licensed under the MIT License.
-
----
-
-💡 *Built with Bash and AWS S3 for simplified backup automation.*
