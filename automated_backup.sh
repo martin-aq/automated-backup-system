@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Define full paths to commands to avoid issues with Cron Jobs
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
 # Function to define color variables
 function set_colors {
     RED='\033[31m'
